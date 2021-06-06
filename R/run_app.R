@@ -7,6 +7,7 @@
 #' @export
 #' @importFrom shiny shinyApp
 #' @importFrom golem with_golem_options 
+#' @importFrom shinymanager secure_app
 run_app <- function(
   onStart = NULL,
   options = list(), 
@@ -16,7 +17,7 @@ run_app <- function(
 ) {
   with_golem_options(
     app = shinyApp(
-      ui = app_ui,
+      ui = secure_app(app_ui, enable_admin=T),
       server = app_server,
       onStart = onStart,
       options = options, 

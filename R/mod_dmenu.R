@@ -17,7 +17,8 @@ mod_dmenu_ui <- function(id){
 #' dmenu Server Functions
 #'
 #' @noRd 
-mod_dmenu_server <- function(id, merchant="admin"){
+mod_dmenu_server <- function(id, merchant){
+  req(!is.null(merchant))
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     output$menu<-renderMenu({
@@ -47,23 +48,22 @@ mod_dmenu_server <- function(id, merchant="admin"){
       } else {
         sidebarMenu(
           menuItem(
-            text="Scores",
-            badgeLabel = "Merchants",
+            text="Merchants",
             tabName="merchant",
-            status="success",
+            #status="success",
             selected= T
           ),
           menuItem(
             text="Customer Behaviour",
             badgeLabel = "Premium",
             tabName="premium",
-            status="danger",
+            #status="danger",
             selected= F
           ),
           menuItem(
             text="About LaNubia",
             badgeLabel = "Supplier",
-            status="info",
+            #status="info",
             selected= F
           )
         )

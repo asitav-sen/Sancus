@@ -6,13 +6,16 @@ Description: Explaining Customer Loyalty.
 License: MIT + file LICENSE
 Imports: 
     attempt,
+    bs4Dash,
     config (>= 0.3.1),
     DT,
     glue,
     golem (>= 0.3.1.9000),
     htmltools,
     processx,
-    shiny (>= 1.6.0)
+    shiny (>= 1.6.0),
+    shinymanager,
+    thinkr
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1

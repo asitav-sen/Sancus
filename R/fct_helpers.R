@@ -71,6 +71,8 @@ scaler <- function(x){(x-min(x))/(max(x)-min(x))}
 #'
 #' @noRd
 scorer.all<-function(df, ttype=0){
+  # req(!is.null(df))
+  # req(nrow(df)>0)
   withProgress(
     message=sample(c("Learning to play guitar", "Smoking a cigar", "Burning some buildings", "Dealing in Dark-sided stuff", "Pretending to do a lot of work"),1,T,prob = c(0.20,0.20,0.20,0.20,0.20)),
     detail="You probably don't wanna know how",
@@ -151,7 +153,8 @@ getmode <- function(v) {
 #'
 #' @noRd
 score.growth<-function(df, kpi="valcat"){
-  
+  # req(!is.null(df))
+  # req(nrow(df)>0)
   withProgress(
     message = "He he..",
     detail = "Peek-a-boo",
@@ -306,6 +309,8 @@ taboverall<- function(){
 #'
 #' @noRd
 milesummary<- function(df){
+  # req(!is.null(df))
+  # req(nrow(df)>0)
   df %>% 
     mutate(TTime=ymd_hms(TTime)) %>% 
     mutate(monthid=ceiling_date(TTime,"month")) %>% 

@@ -21,6 +21,12 @@ app_ui <- function(request) {
           tabItem(
             tabName="mstory",
             tabmstory()
+          ),
+          tabItem(
+            tabName="merchant"
+          ),
+          tabItem(
+            tabName="premium"
           )
         )
         ),

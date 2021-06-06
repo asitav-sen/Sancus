@@ -4,13 +4,33 @@
 #'     DO NOT REMOVE.
 #' @import shiny
 #' @importFrom fst read.fst
+#' @importFrom shinymanager check_credentials secure_server
 #' @noRd
 app_server <- function( input, output, session ) {
   
+  
+  res_auth <- secure_server(
+    check_credentials = check_credentials(
+      "./cred.sqlite",
+      passphrase = "dreamcatcher"
+    )
+  )
+  
+  company<- reactive({
+    req(input$shinymanager_where)
+    isolate(res_auth$company)
+  })
+  
+  observeEvent(company(),{
+    if(!is.null(company())){
+      mod_dmenu_server("mmenu", merchant=company())
+    }
+  }
+  )
+  
+  
   df<-read.fst("./data/transactiondata.fst")
   
-  
-  mod_dmenu_server("mmenu", merchant="admin")
   
   observeEvent(c(input$valsel, input$typesel),{
     scored.all<- reactive({
@@ -72,7 +92,6 @@ app_server <- function( input, output, session ) {
     )
     mod_barchart_server("milsumall",x=mil.sum.df()$monthid,y=mil.sum.df()$miles, xtitle="", ytitle="Miles")
   })
-  
   
   
   

@@ -18,6 +18,7 @@
 usethis::use_package( "thinkr" )
 usethis::use_package( "shiny" )
 usethis::use_package( "bs4Dash" )
+usethis::use_package( "shinymanager" )
 
 ## Add modules ----
 ## Create a module infrastructure in R/
