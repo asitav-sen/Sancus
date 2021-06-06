@@ -21,11 +21,11 @@
 golem::fill_desc(
   pkg_name = "Sancus", # The Name of the package containing the App 
   pkg_title = "Sancus", # The Title of the package containing the App 
-  pkg_description = "Explaining Customer Loyalty", # The Description of the package containing the App 
+  pkg_description = "Explaining Customer Loyalty.", # The Description of the package containing the App 
   author_first_name = "Scary", # Your First Name
   author_last_name = "Scarecrow", # Your Last Name
   author_email = "7u90fioq2@relay.firefox.com", # Your Email
-  repo_url = NULL # The URL of the GitHub Repo (optional) 
+  repo_url = "https://github.com/asitav-sen/Sancus" # The URL of the GitHub Repo (optional) 
 )     
 
 ## Set {golem} options ----
@@ -33,14 +33,14 @@ golem::set_golem_options()
 
 ## Create Common Files ----
 ## See ?usethis for more information
-usethis::use_mit_license( "Golem User" )  # You can set another license here
+usethis::use_mit_license( "Scary Scarecrow" )  # You can set another license here
 usethis::use_readme_rmd( open = FALSE )
 usethis::use_code_of_conduct()
 usethis::use_lifecycle_badge( "Experimental" )
-usethis::use_news_md( open = FALSE )
+#usethis::use_news_md( open = FALSE )
 
 ## Use git ----
-usethis::use_git()
+#usethis::use_git()
 
 ## Init Testing Infrastructure ----
 ## Create a template for tests

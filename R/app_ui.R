@@ -3,15 +3,33 @@
 #' @param request Internal parameter for `{shiny}`. 
 #'     DO NOT REMOVE.
 #' @import shiny
+#' @import bs4Dash
 #' @noRd
 app_ui <- function(request) {
   tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
-    # Your application UI logic 
-    fluidPage(
-      h1("Loyalty")
-    )
+    dashboardPage(
+      header=headr(),
+      sidebar= sidebr(),
+      body = dashboardBody(
+        tabItems(
+          tabItem(
+            tabName="overall",
+            taboverall()
+          ),
+          tabItem(
+            tabName="mstory",
+            tabmstory()
+          )
+        )
+        ),
+      controlbar = NULL,  
+      footer = footr(),
+      dark = T,
+      scrollToTop = TRUE,
+      fullscreen=T
+      )
   )
 }
 
