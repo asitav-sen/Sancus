@@ -7,33 +7,54 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
-mod_barchart_ui <- function(id){
+mod_barchart_ui <- function(id,ht="300px", wt="100%"){
   ns <- NS(id)
   tagList(
-    plotlyOutput(ns("barplot")) 
+    shinycssloaders::withSpinner(plotly::plotlyOutput(ns("barplot"), height = ht, width =wt), image="./www/horse.gif", image.width = "75px")
   )
 }
     
 #' barchart Server Functions
 #'
 #' @noRd 
-mod_barchart_server <- function(id,x,y, xtitle, ytitle){
+mod_barchart_server <- function(id,x,y,z=NULL, xtitle, ytitle, lo="h"){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     output$barplot<- renderPlotly({
+      if(is.null(z)){
         plot_ly(
           x= ~x,
           y= ~y,
           type = 'bar',
           showlegend=F
         )%>%
-        layout(
-          xaxis = list(title = xtitle, color = "white"),
-          yaxis = list(title = ytitle, color = "white"),
-          plot_bgcolor = 'transparent',
-          paper_bgcolor = 'transparent'
-        ) %>% plotly::config(displayModeBar = FALSE)
-    })
+          layout(
+            xaxis = list(title = xtitle, color = "white"),
+            yaxis = list(title = ytitle, color = "white"),
+            plot_bgcolor = 'transparent',
+            paper_bgcolor = 'transparent',
+            hoverlabel=list(bgcolor="black")
+          ) %>% plotly::config(displayModeBar = FALSE)
+      } else {
+        plot_ly(
+          x= ~x,
+          y= ~y,
+          color= ~z,
+          colors = c("dodgerblue", "cadetblue3", "cornflowerblue","deepskyblue3", "lightblue1", "darkslategray3"),
+          type = 'bar',
+          showlegend=T
+        )%>%
+          layout(
+            xaxis = list(title = xtitle, color = "white"),
+            yaxis = list(title = ytitle, color = "white"),
+            plot_bgcolor = 'transparent',
+            paper_bgcolor = 'transparent',
+            legend = list(orientation = lo, font=list(color = "white")),
+            hoverlabel=list(bgcolor="black")      
+          ) %>% plotly::config(displayModeBar = FALSE)
+      }
+        
+    }) 
   })
 }
     

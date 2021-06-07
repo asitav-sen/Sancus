@@ -48,13 +48,13 @@ mod_dmenu_server <- function(id, merchant){
       } else {
         sidebarMenu(
           menuItem(
-            text="Merchants",
+            text="Basic",
             tabName="merchant",
             #status="success",
             selected= T
           ),
           menuItem(
-            text="Customer Behaviour",
+            text="Advanced",
             badgeLabel = "Premium",
             tabName="premium",
             #status="danger",

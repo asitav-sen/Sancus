@@ -78,7 +78,7 @@ scorer.all<-function(df, ttype=0){
     detail="You probably don't wanna know how",
     value=0,
     {
-      setProgress(value=1,message="Finding wierd stuff in the internet")
+      setProgress(value=1,message=sample(c("Learning to play guitar", "Smoking a cigar", "Burning some buildings", "Dealing in Dark-sided stuff", "Pretending to do a lot of work"),1,T,prob = c(0.20,0.20,0.20,0.20,0.20)))
       scores.overall<-
         df%>%
         filter(TType==ttype)%>%
@@ -349,7 +349,243 @@ tabmstory<- function(){
 }
 
 
+#'
+#' @description A fct function
+#'
+#' @return The return value, if any, from executing the function.
+#' @importFrom dplyr filter mutate group_by ungroup row_number n arrange lag
+#' @importFrom magrittr %>%
+#' @importFrom lubridate ymd_hms ceiling_date
+#'
+#' @noRd
+repcal<- function(df,merc="merchant1", lim=2){
+  df %>% 
+    filter(merchant==merc) %>% 
+    mutate(TTime=ymd_hms(TTime)) %>% 
+    group_by(CustomerId) %>% 
+    mutate(TTimelag=lag(TTime)) %>% 
+    mutate(time.pur=as.integer(difftime(TTime,TTimelag, units = "days"))) %>% 
+    mutate(rep.pur= ifelse(is.na(time.pur) | time.pur>lim,"New","Repeat") ) %>% 
+    mutate(monthid=ceiling_date(TTime,"month")) %>% 
+    group_by(monthid,rep.pur) %>% 
+    summarize(count=n(), miles=sum(miles), customers=length(unique(CustomerId)))
+}
 
+
+#'
+#' @description A fct function
+#'
+#' @return The return value, if any, from executing the function.
+#' @importFrom dplyr filter mutate group_by ungroup row_number n arrange lag
+#' @importFrom magrittr %>%
+#' @importFrom lubridate ymd_hms ceiling_date
+#'
+#' @noRd
+tabmhome<- function(){
+  fluidRow(
+    box(
+      title = "Sales/Revenue",
+      solidHeader = T,
+      width = 12,
+      headerBorder = T,
+      status ="secondary",
+      fluidRow(
+        column(
+          width = 6,
+          "Transactions",
+          mod_barchart_ui("salrevtr")
+        ),
+        column(
+          width = 6,
+          "Revenue/Miles",
+          mod_barchart_ui("salrevmil")
+        )
+      )
+    ),
+    box(
+      title = "New vs. Returning",
+      solidHeader = T,
+      width = 12,
+      headerBorder = T,
+      status ="secondary",
+      fluidRow(
+        sliderInput("churnlim","Expected gap between purchase", min=1,max=400, value=30)
+      ),
+      fluidRow(
+        column(
+          width = 4,
+          h5("Number of transactions"),
+          mod_barchart_ui("newrep")
+        ),
+        column(
+          width = 4,
+          h5("Amount/Miles"),
+          mod_barchart_ui("newrepmiles")
+        ),
+        column(
+          width = 4,
+          h5("Customers"),
+          mod_barchart_ui("newrepclients")
+        )
+      )
+    ),
+    box(
+      title = "Share of Wallet",
+      solidHeader = T,
+      width = 12,
+      headerBorder = T,
+      status ="secondary",
+      fluidRow(
+        column(
+          width = 6,
+          "By Transaction",
+          mod_linechart_ui("sowtr")
+        ),
+        column(
+          width = 6,
+          "By Amount/Miles",
+          mod_linechart_ui("sowmil")
+        )
+      )
+    ),
+    box(
+      title = textOutput("scoretitlemersel"),
+      solidHeader = T,
+      width = 12,
+      headerBorder = T,
+      status ="secondary",
+      tagList(
+        fluidRow(
+          column(
+            width=6,
+            radioButtons("typeselmer","Select Transaction Type", 
+                         choiceNames = c("Miles Earned","Miles Redeemed"),
+                         choiceValues = c(0,1), selected = 0, inline = T)
+          ),
+          column(
+            width=6,
+            radioButtons("valselmersel","Select score based on", 
+                         choiceNames = c("Overall","Transaction Value","Transaction Frequency"),
+                         choiceValues = c("valscore","repscore","milscore"), selected = "valscore", inline = T)
+          )
+        ),
+        fluidRow(
+          column(
+            width = 10,
+            mod_histo_ui("milestypemersel")
+          ),
+          column(
+            width = 2,
+            mod_infoboxcollection_ui("scoredeltamersel")
+          )
+        )
+      )
+    )
+  )
+}
+
+
+
+#' @description A fct function
+#'
+#' @return The return value, if any, from executing the function.
+#' @importFrom dplyr filter mutate group_by ungroup row_number n arrange lag case_when summarize
+#' @importFrom magrittr %>%
+#' @importFrom lubridate ymd_hms ceiling_date
+#'
+#' @noRd
+
+sowcal<-function(dff, merc="merchant1"){
+  
+  clist<- unique(dff[dff$merchant==merc,]$CustomerId)
+  
+  dff %>% 
+    filter(CustomerId %in% clist) %>% 
+    mutate(TTime=ymd_hms(TTime)) %>% 
+    mutate(monthid=ceiling_date(TTime,"month"), self=ifelse(merchant==merc, "your","other")) %>% 
+    group_by(monthid, self) %>% 
+    summarize(miles=sum(miles), count=n()) %>% 
+    mutate(sowmil=round(miles*100/sum(miles),2), sowtr=round(count*100/sum(count),2)) %>% 
+    filter(self=="your")
+  
+}
+
+
+#' @description A fct function
+#'
+#' @return The return value, if any, from executing the function.
+#' @importFrom dplyr filter mutate group_by ungroup row_number n arrange lag case_when summarize
+#' @importFrom magrittr %>%
+#' @importFrom lubridate ymd_hms ceiling_date
+#'
+#' @noRd
+
+salrevcal<-function(dff, merc="merchant1"){
+  
+  dff %>% 
+    filter(merchant==merc) %>% 
+    mutate(TTime=ymd_hms(TTime)) %>% 
+    mutate(monthid=ceiling_date(TTime,"month")) %>% 
+    group_by(monthid) %>% 
+    summarize(count=n(), miles=sum(miles))
+  
+}
+
+
+#' @description A fct function
+#'
+#' @return The return value, if any, from executing the function.
+#' @importFrom dplyr filter mutate group_by ungroup row_number n arrange lag case_when summarize
+#' @importFrom magrittr %>%
+#' @importFrom lubridate ymd_hms ceiling_date ymd
+#' @importFrom forcats fct_lump
+#'
+#' @noRd
+
+segmentd<-function(dff, merc="merchant1"){
+  
+  clist<- unique(dff[dff$merchant==merc,]$CustomerId)
+  dff %>% 
+    filter(CustomerId %in% clist) %>% 
+    mutate(TTime=ymd_hms(TTime)) %>% 
+    filter(merchant!=merc) %>% 
+    mutate(monthid=ceiling_date(TTime,"month")) %>% 
+    mutate(Segment = fct_lump(Segment, n = 19)) %>% 
+    group_by(monthid,Segment) %>% 
+    summarize(count=n(), miles=sum(miles)) %>% 
+    filter(monthid>ymd("2015-01-01"))
+    
+  
+}
+
+
+
+#' @description A fct function
+#'
+#' @return The return value, if any, from executing the function.
+#' @importFrom dplyr filter mutate group_by ungroup row_number n arrange lag
+#' @importFrom magrittr %>%
+#' @importFrom lubridate ymd_hms ceiling_date
+#'
+#' @noRd
+tabpremium<- function(){
+  fluidRow(
+    box(
+      title = "Our Customer Behaviour",
+      solidHeader = T,
+      width = 12,
+      headerBorder = T,
+      status ="secondary",
+      fluidRow(
+          h5("Transactions by segment"),
+          mod_barchart_ui("ownsegmenttrn", ht="400px", wt="1200px")),
+      fluidRow(
+        h5("Amount/miles by segment"),
+        mod_barchart_ui("ownsegmentmil", ht="400px", wt="1200px")
+      )
+      )
+    )
+}
 
 
 
