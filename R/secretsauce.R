@@ -5,6 +5,7 @@ credentials <- data.frame(
   # password will automatically be hashed
   admin = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
   company = c("admin","admin","admin","admin","merchant1", "merchant2"),
+  premium = c(TRUE, TRUE, TRUE, TRUE, TRUE, FALSE),
   stringsAsFactors = FALSE
 )
 

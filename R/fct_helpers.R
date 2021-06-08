@@ -9,9 +9,9 @@ headr<-function(){
   dashboardHeader(
     title=dashboardBrand(
       title = "Sancus",
-      color = "primary",
-      href = "https://adminlte.io/themes/v3",
-      image = "https://adminlte.io/themes/v3/dist/img/AdminLTELogo.png"
+      color = "gray-dark",
+      href = "https://www.fortuna.club/",
+      image = "./www/logo-fortuna-color.png"
     ),
     skin="dark"
   )
@@ -28,6 +28,7 @@ headr<-function(){
 sidebr<-function(){
   dashboardSidebar(
     collapsed=T,
+    id="sidebar",
     mod_dmenu_ui("mmenu")
     
     )
@@ -46,7 +47,7 @@ footr<-function(){
       target = "_blank", "Build a dashboard like this"
     ),
     right = a(
-      href = "https://github.com/asitav-sen/fishstat2020",
+      href = "https://github.com/asitav-sen/Sancus",
       target = "_blank", "Code in Github. MIT license"
     )
   )
@@ -73,12 +74,14 @@ scaler <- function(x){(x-min(x))/(max(x)-min(x))}
 scorer.all<-function(df, ttype=0){
   # req(!is.null(df))
   # req(nrow(df)>0)
+  ms=c("Giving flying lessons to Superman", "Tickling Genghis Khan", "Burning some buildings", 
+       "Dealing in Dark-sided stuff", "Scanning for virus", "Scanning for covid virus", "Discussing new car design with Musk")
   withProgress(
-    message=sample(c("Learning to play guitar", "Smoking a cigar", "Burning some buildings", "Dealing in Dark-sided stuff", "Pretending to do a lot of work"),1,T,prob = c(0.20,0.20,0.20,0.20,0.20)),
+    message=sample(ms,1,T),
     detail="You probably don't wanna know how",
     value=0,
     {
-      setProgress(value=1,message=sample(c("Learning to play guitar", "Smoking a cigar", "Burning some buildings", "Dealing in Dark-sided stuff", "Pretending to do a lot of work"),1,T,prob = c(0.20,0.20,0.20,0.20,0.20)))
+      setProgress(value=1,message=sample(ms,1,T))
       scores.overall<-
         df%>%
         filter(TType==ttype)%>%
@@ -103,7 +106,7 @@ scorer.all<-function(df, ttype=0){
         filter(!is.nan(milscore)) %>% 
         filter(!is.nan(valscore))
       
-      setProgress(value=2,message="Gained access!")
+      setProgress(value=2,message=sample(ms,1,T))
       
       ar<-as.numeric(quantile(scores.overall$repscore,0.75))
       br<-as.numeric(quantile(scores.overall$repscore,0.25))
@@ -394,12 +397,12 @@ tabmhome<- function(){
           width = 6,
           "Transactions",
           mod_barchart_ui("salrevtr")
-        ),
+        ) %>%  tooltip(placement="top", title="Transactions by month. Click and drag to zoom. Hover for info"),
         column(
           width = 6,
           "Revenue/Miles",
           mod_barchart_ui("salrevmil")
-        )
+        ) %>%  tooltip(placement="top", title="Miles by month. Click and drag to zoom. Hover for info")
       )
     ),
     box(
@@ -409,24 +412,25 @@ tabmhome<- function(){
       headerBorder = T,
       status ="secondary",
       fluidRow(
-        sliderInput("churnlim","Expected gap between purchase", min=1,max=400, value=30)
+        sliderInput("churnlim","Expected gap between purchase", min=1,max=400, value=30) %>% 
+          tooltip(placement="top", title="If a customer does not return withing these many days, you consider her churned/lost.")
       ),
       fluidRow(
         column(
           width = 4,
           h5("Number of transactions"),
           mod_barchart_ui("newrep")
-        ),
+        )%>%  tooltip(placement="top", title="Click and drag to zoom. Hover for info"),
         column(
           width = 4,
           h5("Amount/Miles"),
           mod_barchart_ui("newrepmiles")
-        ),
+        )%>%  tooltip(placement="top", title="Click and drag to zoom. Hover for info"),
         column(
           width = 4,
           h5("Customers"),
           mod_barchart_ui("newrepclients")
-        )
+        )%>%  tooltip(placement="top", title="Click and drag to zoom. Hover for info")
       )
     ),
     box(
@@ -440,12 +444,14 @@ tabmhome<- function(){
           width = 6,
           "By Transaction",
           mod_linechart_ui("sowtr")
-        ),
+        )%>%  tooltip(placement="top", title="This is no. of transactions your customers 
+                      makes at your outlet out of every 100 transaction s/he makes in a month."),
         column(
           width = 6,
           "By Amount/Miles",
           mod_linechart_ui("sowmil")
-        )
+        )%>%  tooltip(placement="top", title="This is the amount your customer spends out of every 
+                      $100 s/he spends every month.")
       )
     ),
     box(
@@ -461,23 +467,23 @@ tabmhome<- function(){
             radioButtons("typeselmer","Select Transaction Type", 
                          choiceNames = c("Miles Earned","Miles Redeemed"),
                          choiceValues = c(0,1), selected = 0, inline = T)
-          ),
+          )%>%  tooltip(placement="top", title="select Redeemed or Earned"),
           column(
             width=6,
             radioButtons("valselmersel","Select score based on", 
-                         choiceNames = c("Overall","Transaction Value","Transaction Frequency"),
+                         choiceNames = c("Overall","Transaction Value","Transaction recency + frequency"),
                          choiceValues = c("valscore","repscore","milscore"), selected = "valscore", inline = T)
-          )
+          ) %>%  tooltip(placement="top", title="Scores divided into 3 categories. One based on transaction value or miles. Other on transaction frequency and recency. Other combines both.")
         ),
         fluidRow(
           column(
             width = 10,
             mod_histo_ui("milestypemersel")
-          ),
+          )  %>%  tooltip(placement="top", title="Scores divided into 3 categories. High is top 25 % clients, medium 50% and low is 25%."),
           column(
             width = 2,
             mod_infoboxcollection_ui("scoredeltamersel")
-          )
+          )  %>%  tooltip(placement="top", title="Shows changes in number of clients in each of High, Medium, Low vis-vis last month.")
         )
       )
     )
@@ -542,9 +548,14 @@ salrevcal<-function(dff, merc="merchant1"){
 #'
 #' @noRd
 
-segmentd<-function(dff, merc="merchant1"){
+segmentd<-function(dff, merc="merchant1", a=1){
   
-  clist<- unique(dff[dff$merchant==merc,]$CustomerId)
+  if(a==1){
+    clist<- unique(dff[dff$merchant==merc,]$CustomerId)
+  } else {
+    clist<- unique(dff[dff$merchant!=merc,]$CustomerId)
+  }
+  
   dff %>% 
     filter(CustomerId %in% clist) %>% 
     mutate(TTime=ymd_hms(TTime)) %>% 
@@ -571,22 +582,73 @@ segmentd<-function(dff, merc="merchant1"){
 tabpremium<- function(){
   fluidRow(
     box(
-      title = "Our Customer Behaviour",
+      title = "Our Customer's Behaviour",
       solidHeader = T,
       width = 12,
       headerBorder = T,
       status ="secondary",
       fluidRow(
           h5("Transactions by segment"),
-          mod_barchart_ui("ownsegmenttrn", ht="400px", wt="1200px")),
+          mod_barchart_ui("ownsegmenttrn", ht="400px", wt="1200px")) %>%  
+        tooltip(placement="top", title="Which segments are your customers making transactions?"),
       fluidRow(
         h5("Amount/miles by segment"),
         mod_barchart_ui("ownsegmentmil", ht="400px", wt="1200px")
-      )
-      )
+      )  %>%  
+        tooltip(placement="top", title="How much are your customers spending in different segments?"),
+      fluidRow(
+        h5("Shopping Locations"),
+        mod_mapplot_ui("ownsegmentloc")
+      ) %>%  
+        tooltip(placement="top", title="Where are your customers shopping from?")
+      ),
+    box(
+      title = "Our Prospect's Behaviour",
+      solidHeader = T,
+      width = 12,
+      headerBorder = T,
+      status ="secondary",
+      fluidRow(
+        h5("Transactions by segment"),
+        mod_barchart_ui("othsegmenttrn", ht="400px", wt="1200px")) %>%  
+        tooltip(placement="top", title="Which segments are your prospects (Those who do not buy from you) making transactions?"),
+      fluidRow(
+        h5("Amount/miles by segment"),
+        mod_barchart_ui("othsegmentmil", ht="400px", wt="1200px")
+      )%>%  
+        tooltip(placement="top", title="How much are your prospects (Those who do not buy from you) spending in different segments?"),
+      fluidRow(
+        h5("Shopping Locations"),
+        mod_mapplot_ui("othsegmentloc")
+      )%>%  
+        tooltip(placement="top", title="Where are your prospects (Those who do not buy from you) shopping from?")
+    )
     )
 }
 
 
+#' @description A fct function
+#'
+#' @return The return value, if any, from executing the function.
+#' @importFrom dplyr filter mutate group_by ungroup row_number n arrange lag case_when summarize
+#' @importFrom magrittr %>%
+#' @importFrom lubridate ymd_hms ceiling_date ymd
+#' @importFrom forcats fct_lump
+#'
+#' @noRd
 
+segmentloc<-function(dff, merc="merchant1", a="1"){
+
+  if(a=="1"){
+    clist<- unique(dff[dff$merchant==merc,]$CustomerId)
+  } else {
+    clist<- unique(dff[dff$merchant!=merc,]$CustomerId)
+  }
+  
+  dff %>% 
+    filter(CustomerId %in% clist) %>% 
+    select(retailers, merchant, Segment, lat, long) %>% 
+    unique() 
+
+}
 

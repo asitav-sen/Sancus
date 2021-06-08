@@ -4,6 +4,8 @@
 #'     DO NOT REMOVE.
 #' @import shiny
 #' @import bs4Dash
+#' @importFrom  waiter transparent
+#' @importFrom fresh use_theme
 #' @noRd
 app_ui <- function(request) {
   tagList(
@@ -36,7 +38,10 @@ app_ui <- function(request) {
       footer = footr(),
       dark = T,
       scrollToTop = TRUE,
-      fullscreen=T
+      fullscreen=T,
+      preloader = list(html = img(src=paste0("https://i.giphy.com/media/Jsc1clm9osgMIUVaJO/giphy.webp")), 
+                               color=transparent(.5)
+                       )
       )
   )
 }

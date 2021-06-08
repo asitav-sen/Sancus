@@ -17,13 +17,14 @@ mod_dmenu_ui <- function(id){
 #' dmenu Server Functions
 #'
 #' @noRd 
-mod_dmenu_server <- function(id, merchant){
+mod_dmenu_server <- function(id, merchant, premium){
   req(!is.null(merchant))
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     output$menu<-renderMenu({
       if(merchant=="admin") {
         sidebarMenu(
+          id="men",
           menuItem(
             text="Overall Scores",
             tabName="overall",
@@ -45,28 +46,55 @@ mod_dmenu_server <- function(id, merchant){
             selected= F
           )
         )
-      } else {
-        sidebarMenu(
-          menuItem(
-            text="Basic",
-            tabName="merchant",
-            #status="success",
-            selected= T
-          ),
-          menuItem(
-            text="Advanced",
-            badgeLabel = "Premium",
-            tabName="premium",
-            #status="danger",
-            selected= F
-          ),
-          menuItem(
-            text="About LaNubia",
-            badgeLabel = "Supplier",
-            #status="info",
-            selected= F
+      } else { 
+        if(premium == T){
+          sidebarMenu(
+            id="men",
+            menuItem(
+              text="Basic",
+              tabName="merchant",
+              #status="success",
+              selected= T
+            ),
+            menuItem(
+              text="Advanced",
+              badgeLabel = "Premium",
+              tabName="premium",
+              #status="danger",
+              selected= F
+            ),
+            menuItem(
+              text="About LaNubia",
+              badgeLabel = "Supplier",
+              #status="info",
+              selected= F
+            )
           )
-        )
+        } else {
+          sidebarMenu(
+            id="men",
+            menuItem(
+              text="Basic",
+              tabName="merchant",
+              #status="success",
+              selected= T
+            ),
+            menuItem(
+              text="Advanced",
+              badgeLabel = "Premium",
+              tabName="premiumdummy",
+              #status="danger",
+              selected= F
+            ),
+            menuItem(
+              text="About LaNubia",
+              badgeLabel = "Supplier",
+              #status="info",
+              selected= F
+            )
+          )
+        }
+
       }
     })
  

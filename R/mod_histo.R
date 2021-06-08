@@ -19,8 +19,8 @@ mod_histo_ui <- function(id){
 #'
 #' @noRd 
 mod_histo_server <- function(id,x, xt="", yt=""){
+  req(x)
   moduleServer( id, function(input, output, session){
-    req(!is.null(x))
     ns <- session$ns
     output$histoplot<-renderPlotly({
       res <- hist(x, breaks = 250)
