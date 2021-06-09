@@ -254,7 +254,7 @@ app_server <- function( input, output, session ) {
           jumbotron(
             title = "Boost your revenues!",
             lead = "Take decisions driven by data. Understand how and where your customers and prospects are spending.",
-            "There are three ways to boost your revenue. Bring in more customers.",
+            "There are three ways to boost your revenue.",
             tags$ol(
               tags$li("Bring in more customers"), 
               tags$li("Bring in existing customers more frequently"), 

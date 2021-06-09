@@ -27,7 +27,6 @@ mapplotServer<- function(id, df, mname="merchant1"){
     function(input, output, session){
       
       output$mapplot<- renderLeaflet({
-        
         Icons <- icons(
           iconUrl = ifelse(df$merchant == mname,
                            "https://www.fortuna.club/wp-content/uploads/2019/10/logo-fortuna.png",

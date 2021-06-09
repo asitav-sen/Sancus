@@ -486,7 +486,8 @@ tabmhome<- function(){
           )  %>%  tooltip(placement="top", title="Shows changes in number of clients in each of High, Medium, Low vis-vis last month.")
         )
       )
-    )
+    ),
+    salescard()
   )
 }
 
@@ -622,7 +623,8 @@ tabpremium<- function(){
         mod_mapplot_ui("othsegmentloc")
       )%>%  
         tooltip(placement="top", title="Where are your prospects (Those who do not buy from you) shopping from?")
-    )
+    ),
+    salescard()
     )
 }
 
@@ -642,7 +644,10 @@ segmentloc<-function(dff, merc="merchant1", a="1"){
   if(a=="1"){
     clist<- unique(dff[dff$merchant==merc,]$CustomerId)
   } else {
-    clist<- unique(dff[dff$merchant!=merc,]$CustomerId)
+    dff<-dff[dff$TTime >="2020-06-01",]
+    clista<- unique(dff[dff$merchant==merc,]$CustomerId)
+    clistb<- unique(dff$CustomerId)
+    clist<- setdiff(clistb,clista)
   }
   
   dff %>% 
@@ -651,4 +656,48 @@ segmentloc<-function(dff, merc="merchant1", a="1"){
     unique() 
 
 }
+#' @description A fct function
+#'
+#' @return The return value, if any, from executing the function.
+#' @importFrom dplyr filter mutate group_by ungroup row_number n arrange lag case_when summarize
+#' @importFrom magrittr %>%
+#' @importFrom lubridate ymd_hms ceiling_date ymd
+#' @importFrom forcats fct_lump
+#'
+#' @noRd
 
+salescard<-function(){
+  bs4UserCard(
+    title = userDescription(
+      title = "O-Ren Ishii",
+      subtitle = "Poaching guru",
+      type = 2,
+      image = "https://i0.wp.com/dangerouslee.biz/wp-content/uploads/2019/04/Lexi-Montgomery.jpeg?resize=128%2C128&ssl=1",
+    ),
+    footer = actionButton("salescontact","Yes! I want to boost my revenues."),
+    status = NULL,
+    background = NULL,
+    width = 12,
+    height = NULL,
+    collapsible = TRUE,
+    collapsed = FALSE,
+    closable = FALSE,
+    maximizable = FALSE,
+    gradient = FALSE,
+    boxToolSize = "sm",
+    elevation = NULL,
+    headerBorder = TRUE,
+    label = NULL,
+    dropdownMenu = NULL,
+    sidebar = NULL,
+    id = NULL,
+      h5("I can help you by\n"),
+      tags$ol(
+        tags$li("Sending targetted offers to your existing customers with low scores."), 
+        tags$li("Identifying best location for your next outlet, based on shopping behaviour of your prospects."), 
+        tags$li("Sending tagetted offers to your prospects (Those who are not your customers)."),
+        tags$li("And a lot more.....\n")
+      ),
+      h5("Want to explore?")
+  )
+}

@@ -19,6 +19,18 @@ usethis::use_package( "thinkr" )
 usethis::use_package( "shiny" )
 usethis::use_package( "bs4Dash" )
 usethis::use_package( "shinymanager" )
+usethis::use_package( "leaflet" )
+usethis::use_package( "plotly" )
+usethis::use_package( "forcats" )
+usethis::use_package( "fresh" )
+usethis::use_package( "fst" )
+usethis::use_package( "lubridate" )
+usethis::use_package( "magrittr" )
+usethis::use_package( "golem" )
+usethis::use_package( "shinycssloaders" )
+usethis::use_package( "waiter" )
+
+
 
 ## Add modules ----
 ## Create a module infrastructure in R/
