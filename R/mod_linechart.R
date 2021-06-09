@@ -33,8 +33,16 @@ mod_linechart_server <- function(id, x,y,xtitle, ytitle){
           plot_bgcolor = 'transparent',
           paper_bgcolor = 'transparent',
           hoverlabel=list(bgcolor="black")
-        ) %>% plotly::config(displayModeBar = FALSE)
-    })
+        ) %>% plotly::config(displaylogo = FALSE,
+                             modeBarButtonsToRemove = c(
+                               'sendDataToCloud',
+                               'autoScale2d',
+                               'resetScale2d',
+                               'hoverClosestCartesian',
+                               'hoverCompareCartesian'
+                             ))
+    })%>% 
+      bindCache(x,y,xtitle, ytitle)
   })
 }
     

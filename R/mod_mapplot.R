@@ -45,7 +45,8 @@ mapplotServer<- function(id, df, mname="merchant1"){
             #stroke = FALSE, fillOpacity = 0.5,
             label = ~ifelse(merchant==mname, mname, Segment)
           )
-      })
+      }) %>% 
+        bindCache(df, mname)
     }
   )
 }

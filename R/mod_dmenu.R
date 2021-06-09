@@ -96,7 +96,8 @@ mod_dmenu_server <- function(id, merchant, premium){
         }
 
       }
-    })
+    })%>% 
+      bindCache(merchant, premium) 
  
   })
 }

@@ -72,7 +72,7 @@ scaler <- function(x){(x-min(x))/(max(x)-min(x))}
 #'
 #' @noRd
 scorer.all<-function(df, ttype=0){
-  # req(!is.null(df))
+  req(df)
   # req(nrow(df)>0)
   ms=c("Giving flying lessons to Superman", "Tickling Genghis Khan", "Burning some buildings", 
        "Dealing in Dark-sided stuff", "Scanning for virus", "Scanning for covid virus", "Discussing new car design with Musk")

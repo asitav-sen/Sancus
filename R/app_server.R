@@ -49,7 +49,7 @@ app_server <- function( input, output, session ) {
     bindCache(input$valsel, scored.all())
   
   x<- reactive({
-    req(company()=="admin")
+    req(company()=="admin",scored.all())
     if(input$valsel=="valscore"){
       scored.all()[scored.all()$monthid==max(scored.all()$monthid),]$valscore
     } else {

@@ -34,7 +34,14 @@ mod_barchart_server <- function(id,x,y,z=NULL, xtitle, ytitle, lo="h"){
             plot_bgcolor = 'transparent',
             paper_bgcolor = 'transparent',
             hoverlabel=list(bgcolor="black")
-          ) %>% plotly::config(displayModeBar = FALSE)
+          ) %>% plotly::config(displaylogo = FALSE,
+                               modeBarButtonsToRemove = c(
+                                 'sendDataToCloud',
+                                 'autoScale2d',
+                                 'resetScale2d',
+                                 'hoverClosestCartesian',
+                                 'hoverCompareCartesian'
+                               ))
       } else {
         plot_ly(
           x= ~x,
@@ -51,10 +58,18 @@ mod_barchart_server <- function(id,x,y,z=NULL, xtitle, ytitle, lo="h"){
             paper_bgcolor = 'transparent',
             legend = list(orientation = lo, font=list(color = "white")),
             hoverlabel=list(bgcolor="black")      
-          ) %>% plotly::config(displayModeBar = FALSE)
+          ) %>% plotly::config(displaylogo = FALSE,
+                               modeBarButtonsToRemove = c(
+                                 'sendDataToCloud',
+                                 'autoScale2d',
+                                 'resetScale2d',
+                                 'hoverClosestCartesian',
+                                 'hoverCompareCartesian'
+                               ))
       }
         
-    }) 
+    }) %>% 
+      bindCache(df, x,y,z,xtitle, ytitle, lo) 
   })
 }
     

@@ -79,8 +79,16 @@ mod_histo_server <- function(id,x, xt="", yt=""){
           )
         ) %>% 
         add_histogram(x = ~x, nbinsx = 500) %>% 
-        plotly::config(displayModeBar = FALSE)
-    })
+        plotly::config(displaylogo = FALSE,
+                       modeBarButtonsToRemove = c(
+                         'sendDataToCloud',
+                         'autoScale2d',
+                         'resetScale2d',
+                         'hoverClosestCartesian',
+                         'hoverCompareCartesian'
+                       ))
+    }) %>% 
+      bindCache(x, xt, yt) 
     
     
   })

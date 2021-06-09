@@ -37,7 +37,8 @@ mod_infobox_server <- function(id, val, subt, icn, clr, wd, hrf="", grd=F, elv=N
         gradient = grd,
         elevation = elv
       )
-    })
+    })%>% 
+      bindCache(val, subt, icn, clr, wd, hrf, grd, elv)
     
   })
 }

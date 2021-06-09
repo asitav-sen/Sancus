@@ -23,6 +23,7 @@ mod_infoboxcollection_ui <- function(id){
 #'
 #' @noRd 
 mod_infoboxcollection_server <- function(id,gdf){
+  req(gdf)
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
