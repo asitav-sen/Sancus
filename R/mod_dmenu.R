@@ -19,6 +19,7 @@ mod_dmenu_ui <- function(id){
 #' @noRd 
 mod_dmenu_server <- function(id, merchant, premium){
   req(!is.null(merchant))
+  print("menu")
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     output$menu<-renderMenu({
@@ -31,13 +32,6 @@ mod_dmenu_server <- function(id, merchant, premium){
             badgeLabel = "Exclusive",
             #status="warning",
             selected= T
-          ),
-          menuItem(
-            text="MileStory",
-            tabName="mstory",
-            badgeLabel = "Exclusive",
-            #status="danger",
-            selected= F
           ),
           menuItem(
             text="About LaNubia",

@@ -15,120 +15,57 @@ app_server <- function( input, output, session ) {
       passphrase = "dreamcatcher"
     )
   )
+  observe({
+    print(input$shinymanager_where)
+    print(input$shinymanager_language)
+  })
+  
   
   company<- reactive({
     req(input$shinymanager_where)
-    isolate(res_auth$company)
+    print(res_auth$company)
+    res_auth$company
   })
   
   premium<- reactive({
     req(input$shinymanager_where)
-    isolate(res_auth$premium)
+    res_auth$premium
   })
   
   observeEvent(company(),{
+    req(company())
     if(!is.null(company())){
       mod_dmenu_server("mmenu", merchant=company(), premium=premium())
     }
-  }, ignoreNULL = F
+  }
   )
   
   
   df<-read.fst("./data/transactiondata.fst")
   
-  scored.all<-reactive({
-    req(company()=="admin")
-    scorer.all(df,ttype=input$typesel)
-  }) %>% 
-    bindCache(input$typesel, df)
-  
-  growth<-reactive({
-    req(company()=="admin")
-    score.growth(scored.all(), kpi=input$valsel)
-  }) %>% 
-    bindCache(input$valsel, scored.all())
-  
-  x<- reactive({
-    req(company()=="admin",scored.all())
-    if(input$valsel=="valscore"){
-      scored.all()[scored.all()$monthid==max(scored.all()$monthid),]$valscore
+  dtm<- eventReactive(c(input$merc,company()),{
+    print(company())
+    req(company())
+    if(company()=="admin"){
+      df[df$merchant==input$merc,]
     } else {
-      if(input$valsel=="repscore"){
-        scored.all()[scored.all()$monthid==max(scored.all()$monthid),]$repscore
-      } else {
-        scored.all()[scored.all()$monthid==max(scored.all()$monthid),]$milscore
-      }
+      df[df$merchant==company(),]
     }
     
-  })%>% 
-    bindCache(input$valsel, scored.all())
+  })
   
-  observeEvent(c(scored.all(), growth(), x()),{
-    
-    mod_histo_server("milestype1", x=x(), xt="Score", yt="Frequency")
-    output$scoretitle<-renderText(paste0("Customer score for the month ",max(scored.all()$monthid)))
-    mod_infoboxcollection_server("scoredelta",growth())
-  }, ignoreNULL = F)
-  
-  
-  dtm<-reactive({
-    df[df$merchant==input$merove,]
-  })%>% 
-    bindCache(input$merove)
-  
-  scored.mer<-reactive(
+  observeEvent(input$merc,
     {
-      
-      req(input$typesel, dtm(), input$merove)
-      scorer.all(dtm(),ttype=input$typesel)
+      req(company(), dtm(), input$merc)
+      mod_scorer_server("overall",dtm(),input$merc)
     }
-  )%>% 
-    bindCache(dtm(),input$typesel)
+  )
   
-  growth.mer<-reactive({
-    req(scored.mer(),input$valselmerove)
-    score.growth(scored.mer(), kpi=input$valselmerove)
-  })%>% 
-    bindCache(scored.mer(),input$valselmerove)
   
-  y<- reactive({
-    req(input$valselmerove,scored.mer())
-    if(input$valselmerove=="valscore"){
-      scored.mer()[scored.mer()$monthid==max(scored.mer()$monthid),]$valscore
-    } else {
-      if(input$valselmerove=="repscore"){
-        scored.mer()[scored.mer()$monthid==max(scored.mer()$monthid),]$repscore
-      } else {
-        scored.mer()[scored.mer()$monthid==max(scored.mer()$monthid),]$milscore
-      }
-    }
-    
-  })%>% 
-    bindCache(input$valselmerove,scored.mer())
-  
-  observeEvent(c(y(),growth.mer(),scored.mer()),{
-    mod_histo_server("milestypemerove", x=y(), xt="Score", yt="Frequency")
-    output$scoretitlemerove<-renderText(paste0("Customer score for the month ",max(scored.mer()$monthid), " for ", input$merove))
-    mod_infoboxcollection_server("scoredeltamerove",growth.mer())
-  })
-  
-  dfmiles<-reactive({
-    df[df$TType==input$typeselmiles,]
-  })%>% 
-    bindCache(input$typeselmiles,df)
-  
-  mil.sum.df<- reactive({
-    milesummary(dfmiles())
-  }
-  )%>% 
-    bindCache(dfmiles())
-  
-  observeEvent(mil.sum.df(),{
-    mod_barchart_server("milsumall",x=mil.sum.df()$monthid,y=mil.sum.df()$miles, xtitle="", ytitle="Miles")
-  })
   
   rep.dat<-reactive(
     {
+      req(company(), df, input$churnlim)
     if(!is.null(company()))
     repcal(df, merc=company(), lim=input$churnlim)
   }) %>% 
@@ -137,6 +74,7 @@ app_server <- function( input, output, session ) {
   
   observeEvent( input$churnlim,
     {
+      req(company(),rep.dat())
       mod_barchart_server("newrep",x=rep.dat()$monthid,y=rep.dat()$count,z=rep.dat()$rep.pur, xtitle="", ytitle="# Transactions")
       mod_barchart_server("newrepmiles",x=rep.dat()$monthid,y=rep.dat()$miles,z=rep.dat()$rep.pur, xtitle="", ytitle="Amount/Miles")
       mod_barchart_server("newrepclients",x=rep.dat()$monthid,y=rep.dat()$customers,z=rep.dat()$rep.pur, xtitle="", ytitle="# Customers")
@@ -145,6 +83,7 @@ app_server <- function( input, output, session ) {
   
   sow.data<- reactive(
     {
+      req(df, company())
       sowcal(df, company())
     }
   ) %>% 
@@ -157,6 +96,7 @@ app_server <- function( input, output, session ) {
   
   salrev.dat<- reactive(
                               {
+                                req(df, company())
                                 salrevcal(df,company())
                               }) %>% 
     bindCache(company())
@@ -166,45 +106,57 @@ app_server <- function( input, output, session ) {
   
   
   
-  scored.mer.sel<-reactive(
-                             {
-                               req(input$typeselmer, df, company())
-                               scorer.all(df[df$merchant==company(),],ttype=input$typeselmer)
-                             }
-  ) %>% 
-    bindCache(input$typeselmer,df, company())
+  # scored.mer.sel<-reactive(
+  #                            {
+  #                              req(input$typeselmer, df, company())
+  #                              scorer.all(df[df$merchant==company(),],ttype=input$typeselmer)
+  #                            }
+  # ) %>% 
+  #   bindCache(input$typeselmer,df, company())
+  # 
+  # growth.mer.sel<-reactive({
+  #   req(scored.mer.sel(),input$valselmersel)
+  #   score.growth(scored.mer.sel(), kpi=input$valselmersel)
+  # }) %>% 
+  #   bindCache(scored.mer.sel(),input$valselmersel)
+  # 
+  # z<- reactive({
+  #   req(input$valselmersel,scored.mer.sel())
+  #   if(input$valselmersel=="valscore"){
+  #     scored.mer.sel()[scored.mer.sel()$monthid==max(scored.mer.sel()$monthid),]$valscore
+  #   } else {
+  #     if(input$valselmersel=="repscore"){
+  #       scored.mer.sel()[scored.mer.sel()$monthid==max(scored.mer.sel()$monthid),]$repscore
+  #     } else {
+  #       scored.mer.sel()[scored.mer.sel()$monthid==max(scored.mer.sel()$monthid),]$milscore
+  #     }
+  #   }
+  #   
+  # }) %>% 
+  #   bindCache(input$valselmersel,scored.mer.sel())
+  # 
+  # observeEvent(c(z(),growth.mer.sel(),scored.mer.sel()),{
+  #   
+  #   mod_histo_server("milestypemersel", x=z(), xt="Score", yt="Frequency")
+  #   output$scoretitlemersel<-renderText(paste0("Customer score for the month ",max(scored.mer.sel()$monthid)))
+  #   mod_infoboxcollection_server("scoredeltamersel",growth.mer.sel())
+  # })
   
-  growth.mer.sel<-reactive({
-    req(scored.mer.sel(),input$valselmersel)
-    score.growth(scored.mer.sel(), kpi=input$valselmersel)
-  }) %>% 
-    bindCache(scored.mer.sel(),input$valselmersel)
+  # dtsm<- reactive({
+  #   print(company())
+  #   req(input$shinymanager_where)
+  #   print(company())
+  #   df[df$merchant==company(),]
+  # })
   
-  z<- reactive({
-    req(input$valselmerove,scored.mer.sel())
-    if(input$valselmerove=="valscore"){
-      scored.mer.sel()[scored.mer.sel()$monthid==max(scored.mer.sel()$monthid),]$valscore
-    } else {
-      if(input$valselmerove=="repscore"){
-        scored.mer.sel()[scored.mer.sel()$monthid==max(scored.mer.sel()$monthid),]$repscore
-      } else {
-        scored.mer.sel()[scored.mer.sel()$monthid==max(scored.mer.sel()$monthid),]$milscore
-      }
-    }
-    
-  }) %>% 
-    bindCache(input$valselmersel,scored.mer.sel())
-  
-  observeEvent(c(z(),growth.mer.sel(),scored.mer.sel()),{
-    
-    mod_histo_server("milestypemersel", x=z(), xt="Score", yt="Frequency")
-    output$scoretitlemersel<-renderText(paste0("Customer score for the month ",max(scored.mer.sel()$monthid)))
-    mod_infoboxcollection_server("scoredeltamersel",growth.mer.sel())
-  })
+  #observeEvent(dtsm(),{
+    mod_scorer_server("companyselected",dtm(),merc=company())
+  #})
   
   
   segment.self.dat<- reactive(
     {
+      req(company(),df)
       segmentd(df, company())
     }
   ) %>% 
@@ -212,6 +164,7 @@ app_server <- function( input, output, session ) {
   
   segment.loc.dat<- reactive(
     {
+      req(company(),df)
       segmentloc(df,company())
     }
   ) %>% 
@@ -227,6 +180,7 @@ app_server <- function( input, output, session ) {
   
   segment.oth.dat<- reactive(
                                     {
+                                      req(company(),df)
                                       segmentd(df, company(),a=0)
                                     }
   ) %>% 
@@ -234,6 +188,7 @@ app_server <- function( input, output, session ) {
   
   segment.loc.oth.dat<- reactive(
                                    {
+                                     req(company(),df)
                                      segmentloc(df,company(),a=0)
                                    }
   ) %>% 
@@ -292,5 +247,71 @@ app_server <- function( input, output, session ) {
     }
   )
   
+  observeEvent(input$newrephelp,
+               {
+                 showModal(
+                   modalDialog(
+                     title = "New vs Old",
+                     size = "l",
+                     easyClose = T,
+                    "This gives you an idea about number of transactions (and/or number of customers and/or amount) in your business from new customers vis-a-vis old customers. The intention is to increase the business from repeat purchase. This is because acquiring new customer is far more expensive. This also gives you an idea of progess MoM so that you can track progress."
+                   )
+                 )
+               }
+               )
+  
+  observeEvent(input$sowhelp,
+               {
+                 showModal(
+                   modalDialog(
+                     title = "Share of wallet",
+                     size = "l",
+                     easyClose = T,
+                     "Business can be enhanced by increasing the amount customers spend in your product/sevice. Share of wallet gives you an idea about what percent of monthly spend does your customer spend on you. A lower share of wallet indicates opportunity loss. And decreasing share of wallet can be an indicator of some major underlying issue."
+                   )
+                 )
+               }
+  )
+  
+  observeEvent(input$scorehelp,
+               {
+                 showModal(
+                   modalDialog(
+                     title = "Score distribution",
+                     size = "l",
+                     easyClose = T,
+                     "According to one of ouur clients, this is the most valuable information/insight they ever came across, related to customer behaviour. Consider share of wallet; assume that average spend per transaction is $100 in your shop. Does that mean everyone is spending $100 per transaction? Most likely, no. Some are spending probably $10, whereas some may be spending $250. If you build your strategy based on the average of $100, it will never cater to the needs of those who are spending $10 or $250. You must, divide them into groups and build different strategies for each group. So, very low paying groups may need a specific strategy for them to increase their spend per transaction.
+                     The distribution show here serves similar purpose. You can see how many customers are low scoring and how many are high or medium. Thereby giving you opportunity to formulate more targetted strategy."
+                   )
+                 )
+               }
+  )
+  
+  observeEvent(input$selfbeh,
+               {
+                 showModal(
+                   modalDialog(
+                     title = "Behaviour of your customer",
+                     size = "l",
+                     easyClose = T,
+                     "If you want your customers to come more often or spend more money in your business, you need to know their behaviour. May be they are not coming because of your geographic location. In one of the visuals here, you will be able to check where are they mostly shopping from to verify your assumption and formulate your strategy.
+                     Or, you may want to find out in which segment are they spending more or in which segment are they making more transactions. Then you may formulate your strategy accordingly."
+                   )
+                 )
+               }
+  )
+  
+  observeEvent(input$othbeh,
+               {
+                 showModal(
+                   modalDialog(
+                     title = "Behaviour of your customer",
+                     size = "l",
+                     easyClose = T,
+                     "If you want to bring in new customers, then also, much like your existing customers, you need to understand where and how are they spending. Perhaps, to launch new offer or launch a new marketing strategy or tie-up with other businesses where they are already going!"
+                   )
+                 )
+               }
+  )
   
 }

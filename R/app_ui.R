@@ -21,10 +21,6 @@ app_ui <- function(request) {
             taboverall()
           ),
           tabItem(
-            tabName="mstory",
-            tabmstory()
-          ),
-          tabItem(
             tabName="merchant",
             tabmhome()
           ),
@@ -39,9 +35,10 @@ app_ui <- function(request) {
       dark = T,
       scrollToTop = TRUE,
       fullscreen=T,
-      preloader = list(html = img(src=paste0("https://i.giphy.com/media/Jsc1clm9osgMIUVaJO/giphy.webp")), 
-                               color=transparent(.5)
-                       )
+      preloader = NULL
+        # list(html = img(src=paste0("https://i.giphy.com/media/Jsc1clm9osgMIUVaJO/giphy.webp")), 
+        #                        color=transparent(.5)
+        #                )
       )
   )
 }

@@ -73,9 +73,9 @@ scaler <- function(x){(x-min(x))/(max(x)-min(x))}
 #' @noRd
 scorer.all<-function(df, ttype=0){
   req(df)
-  # req(nrow(df)>0)
   ms=c("Giving flying lessons to Superman", "Tickling Genghis Khan", "Burning some buildings", 
-       "Dealing in Dark-sided stuff", "Scanning for virus", "Scanning for covid virus", "Discussing new car design with Musk")
+       "Dealing in Dark-sided stuff", "Scanning for virus", "Scanning for covid virus", "Discussing new car design with Musk",
+       "Spraying sanitizer in your room", "In a planchet session with Hitler")
   withProgress(
     message=sample(ms,1,T),
     detail="You probably don't wanna know how",
@@ -128,7 +128,7 @@ scorer.all<-function(df, ttype=0){
       setProgress(value=4,message="Sorry, gotta go")
     }
   )
-  
+  print(scores.overall)
   scores.overall
 }
 
@@ -156,8 +156,7 @@ getmode <- function(v) {
 #'
 #' @noRd
 score.growth<-function(df, kpi="valcat"){
-  # req(!is.null(df))
-  # req(nrow(df)>0)
+  req(df)
   withProgress(
     message = "He he..",
     detail = "Peek-a-boo",
@@ -202,9 +201,6 @@ score.growth<-function(df, kpi="valcat"){
     }
   )
 
-
-  
-
   names(gr)[1]<-"kpi"
   gr
 }
@@ -223,131 +219,11 @@ taboverall<- function(){
   df<-read.fst("./data/transactiondata.fst")
   merc<-unique(df$merchant)
   tagList(
-  fluidRow(
-    h5("Overall Score"),
-    box(
-      title = textOutput("scoretitle"),
-      solidHeader = T,
-      width = 12,
-      headerBorder = T,
-      status ="secondary",
-        fluidRow(
-          column(
-            width=6,
-            radioButtons("typesel","Select Transaction Type", 
-                         choiceNames = c("Miles Earned","Miles Redeemed"),
-                         choiceValues = c(0,1), selected = 0, inline = T)
-          ),
-          column(
-            width=6,
-            radioButtons("valsel","Select score based on", 
-                         choiceNames = c("Overall","Transaction Value","Transaction Frequency"),
-                         choiceValues = c("valscore","repscore","milscore"), selected = "valscore", inline = T)
-          )
-        ),
-        fluidRow(
-          column(
-            width = 10,
-            mod_histo_ui("milestype1")
-          ),
-          column(
-            width = 2,
-            mod_infoboxcollection_ui("scoredelta")
-          )
-        )
-    )
-  ),
-  fluidRow(
     h5("Scores by Merchant"),
-    box(
-      title = textOutput("scoretitlemerove"),
-      solidHeader = T,
-      width = 12,
-      headerBorder = T,
-      status ="secondary",
-      tagList(
-        fluidRow(
-          column(
-            width = 4,
-            selectizeInput("merove", "Select Merchant",choices=merc, selected="merchant1")
-          ),
-          column(
-            width=4,
-            radioButtons("typeselmerove","Select Transaction Type", 
-                         choiceNames = c("Miles Earned","Miles Redeemed"),
-                         choiceValues = c(0,1), selected = 0, inline = T)
-          ),
-          column(
-            width=4,
-            radioButtons("valselmerove","Select score based on", 
-                         choiceNames = c("Overall","Transaction Value","Transaction Frequency"),
-                         choiceValues = c("valscore","repscore","milscore"), selected = "valscore", inline = T)
-          )
-        ),
-        fluidRow(
-          column(
-            width = 10,
-            mod_histo_ui("milestypemerove")
-          ),
-          column(
-            width = 2,
-            mod_infoboxcollection_ui("scoredeltamerove")
-          )
-        )
-      )
-    )
-    
-  )
-  )
-}
-
-
-#'
-#' @description A fct function
-#'
-#' @return The return value, if any, from executing the function.
-#' @importFrom dplyr filter mutate group_by ungroup row_number n arrange lag summarize
-#' @importFrom magrittr %>%
-#' @importFrom lubridate ymd_hms ceiling_date
-#'
-#' @noRd
-milesummary<- function(df){
-  # req(!is.null(df))
-  # req(nrow(df)>0)
-  df %>% 
-    mutate(TTime=ymd_hms(TTime)) %>% 
-    mutate(monthid=ceiling_date(TTime,"month")) %>% 
-    group_by(monthid) %>% 
-    summarize(miles=sum(miles)) %>% 
-    filter(miles>1000000)
-}
-
-
-
-#'
-#' @description A fct function
-#'
-#' @return The return value, if any, from executing the function.
-#' @importFrom dplyr filter mutate group_by ungroup row_number n arrange lag
-#' @importFrom magrittr %>%
-#' @importFrom lubridate ymd_hms ceiling_date
-#'
-#' @noRd
-tabmstory<- function(){
   fluidRow(
-    box(
-      title = "Miles by month",
-      solidHeader = T,
-      width = 12,
-      headerBorder = T,
-      status ="secondary",
-        fluidRow(
-            radioButtons("typeselmiles","Select Transaction Type", 
-                         choiceNames = c("Miles Earned","Miles Redeemed"),
-                         choiceValues = c(0,1), selected = 0, inline = T),
-            mod_barchart_ui("milsumall")
-        )
-    )
+    selectizeInput("merc", "Select Merchant",choices=merc, selected="merchant1"),
+    mod_scorer_ui("overall")
+  )
   )
 }
 
@@ -430,7 +306,8 @@ tabmhome<- function(){
           width = 4,
           h5("Customers"),
           mod_barchart_ui("newrepclients")
-        )%>%  tooltip(placement="top", title="Click and drag to zoom. Hover for info")
+        )%>%  tooltip(placement="top", title="Click and drag to zoom. Hover for info"),
+        actionButton("newrephelp", "How does it help?")
       )
     ),
     box(
@@ -452,41 +329,11 @@ tabmhome<- function(){
           mod_linechart_ui("sowmil")
         )%>%  tooltip(placement="top", title="This is the amount your customer spends out of every 
                       $100 s/he spends every month.")
-      )
+      ),
+      actionButton("sowhelp", "How does it help?")
     ),
-    box(
-      title = textOutput("scoretitlemersel"),
-      solidHeader = T,
-      width = 12,
-      headerBorder = T,
-      status ="secondary",
-      tagList(
-        fluidRow(
-          column(
-            width=6,
-            radioButtons("typeselmer","Select Transaction Type", 
-                         choiceNames = c("Miles Earned","Miles Redeemed"),
-                         choiceValues = c(0,1), selected = 0, inline = T)
-          )%>%  tooltip(placement="top", title="select Redeemed or Earned"),
-          column(
-            width=6,
-            radioButtons("valselmersel","Select score based on", 
-                         choiceNames = c("Overall","Transaction Value","Transaction recency + frequency"),
-                         choiceValues = c("valscore","repscore","milscore"), selected = "valscore", inline = T)
-          ) %>%  tooltip(placement="top", title="Scores divided into 3 categories. One based on transaction value or miles. Other on transaction frequency and recency. Other combines both.")
-        ),
-        fluidRow(
-          column(
-            width = 10,
-            mod_histo_ui("milestypemersel")
-          )  %>%  tooltip(placement="top", title="Scores divided into 3 categories. High is top 25 % clients, medium 50% and low is 25%."),
-          column(
-            width = 2,
-            mod_infoboxcollection_ui("scoredeltamersel")
-          )  %>%  tooltip(placement="top", title="Shows changes in number of clients in each of High, Medium, Low vis-vis last month.")
-        )
-      )
-    ),
+    mod_scorer_ui("companyselected"),
+    actionButton("scorehelp", "How does it help?"),
     salescard()
   )
 }
@@ -601,7 +448,8 @@ tabpremium<- function(){
         h5("Shopping Locations"),
         mod_mapplot_ui("ownsegmentloc")
       ) %>%  
-        tooltip(placement="top", title="Where are your customers shopping from?")
+        tooltip(placement="top", title="Where are your customers shopping from?"),
+      actionButton("selfbeh","How Does this help?")
       ),
     box(
       title = "Our Prospect's Behaviour",
@@ -622,7 +470,8 @@ tabpremium<- function(){
         h5("Shopping Locations"),
         mod_mapplot_ui("othsegmentloc")
       )%>%  
-        tooltip(placement="top", title="Where are your prospects (Those who do not buy from you) shopping from?")
+        tooltip(placement="top", title="Where are your prospects (Those who do not buy from you) shopping from?"),
+      actionButton("othbeh","How Does this help?")
     ),
     salescard()
     )

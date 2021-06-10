@@ -41,6 +41,7 @@ golem::add_module( name = "dmenu" ) # Name of the module
 golem::add_module( name = "barchart" ) # Name of the module
 golem::add_module( name = "linechart" ) # Name of the module
 golem::add_module( name = "mapplot" ) # Name of the module
+golem::add_module( name = "scorer" ) # Name of the module
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*
